@@ -14,6 +14,7 @@ import com.hb.sellsystem.repository.OrderDetailRepository;
 import com.hb.sellsystem.repository.OrderMasterRepository;
 import com.hb.sellsystem.repository.ProductInfoRepository;
 import com.hb.sellsystem.service.OrderService;
+import com.hb.sellsystem.service.PayService;
 import com.hb.sellsystem.service.ProductService;
 import com.hb.sellsystem.utils.KeyUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,8 @@ public class OrderServiceImpl implements OrderService {
     private ProductInfoRepository infoRepository;
     @Autowired
     private ProductService productService;
+    @Autowired
+    private PayService payService;
 
     @Override
     @Transactional
@@ -143,7 +146,8 @@ public class OrderServiceImpl implements OrderService {
         productService.increaseStock(cartDTOList);
         //如果已支付，退款
         if(orderMaster.getPayStatus().equals(PayStatusEnum.SUCCESS.getCode())){
-            //退款 TODO:
+            //退款
+            payService.refund(orderDTO);
         }
         return orderDTO;
     }
@@ -166,7 +170,7 @@ public class OrderServiceImpl implements OrderService {
         }
         return orderDTO;
     }
-
+    @Transactional
     @Override
     public OrderDTO paid(OrderDTO orderDTO) {
         //判断订单状态
